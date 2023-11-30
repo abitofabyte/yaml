@@ -1,0 +1,33 @@
+version: "3.1"
+
+services:
+  db:
+    image: 'postgres:latest'
+    container_name: yamlConfigurationDatabase
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_DB=yamlconfigurationdatabase
+      - POSTGRES_USER=yamlconfigurationuser
+      - POSTGRES_PASSWORD=/run/secrets/db_password
+    secrets:
+      - db_password
+
+  backend:
+    depends_on:
+      - db
+    build: .
+    container_name: YamlConfigurationGenerator
+    environment:
+      - DB_NAME=yamlconfigurationdatabase
+      - DB_SERVER=db:5432
+      - DB_USER=yamlconfigurationuser
+      - DB_PASSWORD=/run/secrets/db_password
+    secrets:
+      - db_password
+    ports:
+      - '8080:9999'
+
+secrets:
+  db_password:
+    file: db_password.txt
